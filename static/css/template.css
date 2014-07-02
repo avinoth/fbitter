@@ -1,0 +1,62 @@
+.custnav {
+    background: #008CBA;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+
+    color: #ffffff;
+    border: none;
+}
+
+.custnav .navbar-brand {
+    color: inherit;
+    font-size: inherit;
+}
+
+.jumbotron {
+    background: #008CBA;
+    border-radius: 0px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+}
+
+body {
+  padding-top: 50px;
+  padding-bottom: 20px;
+  background: #F5F5F5;
+}
+
+.btn {
+border-radius: 0;
+}
+
+h3 {
+    font-family: 'Open Sans', sans-serif;
+}
+h2 {
+    font-family: 'Open Sans', sans-serif;
+    padding-top: 20px;
+}
+.container .row {
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+
+}
+
+h4 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+}
+
+.panel-footer {
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+    text-align: right;
+    font-family: 'Opsn Sans', sans-serif;
+}
+
+.col-md-4 {
+
+    border-right : solid #0b8db3;
+    border-width : 1px;
+}
