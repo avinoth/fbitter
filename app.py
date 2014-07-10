@@ -10,13 +10,6 @@ consumer_secret = app.config["CONSUMER_SECRET"]
 access_token_key = app.config["ACCESS_KEY"]
 access_token_secret = app.config["ACCESS_SECRET"]
 
-app.config.setdefault('TWEEPY_CONSUMER_KEY', consumer_key)
-app.config.setdefault('TWEEPY_CONSUMER_SECRET', consumer_secret)
-app.config.setdefault('TWEEPY_ACCESS_TOKEN_KEY', access_token_key)
-app.config.setdefault('TWEEPY_ACCESS_TOKEN_SECRET', access_token_secret)
-tweepy = Tweepy(app)
-
-
 
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
@@ -75,10 +68,6 @@ def index():
         flash(resp.status)
     return render_template('index.html', tweets=tweets)  
 
-@app.route('/tweets')
-def show_tweets():
-    tweets = tweepy.api.public_timeline()
-    return render_template('index.html', tweets=tweets) 
 
 
 
