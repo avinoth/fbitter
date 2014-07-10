@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, session, request, render_template, flash
-from flask_oauth import OAuth
+import tweepy
+import flask
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -9,65 +10,62 @@ consumer_secret = app.config["CONSUMER_SECRET"]
 access_token_key = app.config["ACCESS_KEY"]
 access_token_secret = app.config["ACCESS_SECRET"]
 
+callback_url = 'http://localhost:5000/verify'
+session = dict()
+db = dict()
 
-twitter = oauth.remote_app('twitter',
-    base_url='https://api.twitter.com/1/',
-    request_token_url='https://api.twitter.com/oauth/request_token',
-    access_token_url='https://api.twitter.com/oauth/access_token',
-    authorize_url='https://api.twitter.com/oauth/authenticate',
-    consumer_key=consumer_key,
-    consumer_secret=consumer_secret
-)
+
 
 @app.route('/')
-def home():
-    return render_template('index.html')
+def send_token():
+    redirect_url = ""
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret, callback_url)
+
+    try: 
+        #get the request tokens
+        redirect_url= auth.get_authorization_url()
+        session['request_token']= (auth.request_token.key,
+            auth.request_token.secret)
+    except tweepy.TweepError:
+        print 'Error! Failed to get request token'
+
+    #this is twitter's url for authentication
+    return flask.redirect(redirect_url)
 
 
-@twitter.tokengetter
-def get_twitter_token(token=None):
-    return session.get('twitter_token')
+@app.route("/verify")
+def get_verification():
 
+    #get the verifier key from the request url
+    verifier= request.args['oauth_verifier']
 
+    auth = tweepy.OAuthHandler(CONSUMER_TOKEN, CONSUMER_SECRET)
+    token = session['request_token']
+    del session['request_token']
 
-@app.route('/login')
-def login():
-    return twitter.authorize(callback=url_for('oauth_authorized',
-                                next=request.args.get('next') or request.referrer or None))
-    
-    
-@app.route('/oauth-authorized')
-@twitter.authorized_handler
-def oauth_authorized(resp):
-    next_url = request.args.get('next') or url_for('index')
-    if resp is None:
-        flash(u'Access has been denied for the application.')
-        return redirect(next_url)
+    auth.set_request_token(token[0], token[1])
 
-    session['twitter_token'] = (
-        resp['oauth_token'],
-        resp['oauth_token_secret']
-    )
+    try:
+            auth.get_access_token(verifier)
+    except tweepy.TweepError:
+            print 'Error! Failed to get access token.'
 
-    session['twitter_user'] = resp['screen_name']
+    #now you have access!
+    api = tweepy.API(auth)
 
-    flash('Welcome, %s' % resp['screen_name'])
-    return redirect(next_url)
+    #store in a db
+    db['api']=api
+    db['access_token_key']=auth.access_token.key
+    db['access_token_secret']=auth.access_token.secret
+    return flask.redirect(flask.url_for('index'))
 
-
-
-@app.route('/timeline')
+@app.route("/index")
 def index():
-    resp = twitter.get('statuses/home_timeline.json')
-    if resp.status == 200:
-        tweets = resp.data
-    else:
-        tweets = None
-        flash(resp)
-        flash(resp.status)
-    return render_template('index.html', tweets=tweets)  
+    #auth done, app logic can begin
+    api = db['api']
 
-
+    #example, print your latest status posts
+    return flask.render_template('tweets.html', tweets=api.user_timeline())
 
 
 if __name__ == '__main__':
