@@ -1,6 +1,5 @@
 from flask import Flask, redirect, url_for, session, request, render_template, flash
 from flask_oauth import OAuth
-from flask.ext.tweepy import Tweepy
 
 app = Flask(__name__)
 app.config.from_object('config')
