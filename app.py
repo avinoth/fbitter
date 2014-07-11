@@ -4,7 +4,6 @@ import flask
 
 app = Flask(__name__)
 app.config.from_object('config')
-oauth = OAuth()
 consumer_key = app.config["CONSUMER_ID"]
 consumer_secret = app.config["CONSUMER_SECRET"]
 access_token_key = app.config["ACCESS_KEY"]
@@ -24,8 +23,6 @@ def send_token():
     try: 
         #get the request tokens
         redirect_url= auth.get_authorization_url()
-        session['request_token']= (auth.request_token.key,
-            auth.request_token.secret)
     except tweepy.TweepError:
         print 'Error! Failed to get request token'
 
@@ -39,11 +36,14 @@ def get_verification():
     #get the verifier key from the request url
     verifier= request.args['oauth_verifier']
 
-    auth = tweepy.OAuthHandler(CONSUMER_TOKEN, CONSUMER_SECRET)
-    token = session['request_token']
-    del session['request_token']
-
-    auth.set_request_token(token[0], token[1])
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+#===============================================================================
+#     token = session['request_token']
+#     del session['request_token']
+# 
+#     auth.set_request_token(token[0], token[1])
+#===============================================================================
+    auth.set_access_token(access_token_key, access_token_secret) 
 
     try:
             auth.get_access_token(verifier)
@@ -54,18 +54,15 @@ def get_verification():
     api = tweepy.API(auth)
 
     #store in a db
-    db['api']=api
-    db['access_token_key']=auth.access_token.key
-    db['access_token_secret']=auth.access_token.secret
-    return flask.redirect(flask.url_for('index'))
-
-@app.route("/index")
-def index():
-    #auth done, app logic can begin
-    api = db['api']
-
-    #example, print your latest status posts
     return flask.render_template('tweets.html', tweets=api.user_timeline())
+#===============================================================================
+# 
+# @app.route("/index")
+# def index():
+# 
+#     #example, print your latest status posts
+#  
+#===============================================================================
 
 
 if __name__ == '__main__':
