@@ -1,4 +1,6 @@
 Flask==0.10.1
 Jinja2==2.7.2
 Werkzeug==0.9.4
-Flask-OAuth
+tweepy
+oauthlib
+requests
