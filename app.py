@@ -16,5 +16,6 @@ def send_token():
     api = tweepy.API(auth)
     return flask.render_template('tweets.html', tweets=api.user_timeline())
 
+
 if __name__ == '__main__':
     app.run()
